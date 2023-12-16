@@ -26,23 +26,6 @@ st.image(image_path, caption='Intrepid hikers')
 file_path = "./data_files/df_rockies.csv"
 df_rockies = pd.read_csv(file_path)
 
-base_path = "./Aida Strava download/"
-
-# Function to extract coordinates
-def extract_coords(gpx_path):
-  fullpath = base_path + gpx_path
-  try:
-    with open(fullpath, 'r') as gpx_file:
-      gpx = gpxpy.parse(gpx_file)
-      point = gpx.tracks[0].segments[0].points[0]
-      return point.latitude, point.longitude
-  except Exception as e:
-    print(f"Error processing file {fullpath}: {e}")
-    return None, None
-
-# Apply the function and create new columns
-df_rockies[['latitude', 'longitude']] = df_rockies['filename'].apply(lambda x: pd.Series(extract_coords(x)))
-
 # Create a map instance
 map = folium.Map(location=[46.538584, -86.430602],
                  zoom_start=4,
