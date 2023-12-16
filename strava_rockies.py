@@ -6,7 +6,6 @@ import re
 import gpxpy
 
 import folium
-from IPython.display import display
 import base64
 
 import streamlit as st
