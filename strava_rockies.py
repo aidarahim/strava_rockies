@@ -37,7 +37,7 @@ def extract_coords(gpx_path):
       point = gpx.tracks[0].segments[0].points[0]
       return point.latitude, point.longitude
   except Exception as e:
-    print(f"Error processing file {filepath}: {e}")
+    print(f"Error processing file {fullpath}: {e}")
     return None, None
 
 # Apply the function and create new columns
