@@ -12,12 +12,20 @@ import base64
 import streamlit as st
 from streamlit_folium import folium_static
 
-plt.rcParams['axes.spines.top'] = False
-plt.rcParams['axes.spines.right'] = False
+APP_TITLE = 'Adventures in the Canadian Rockies'
+APP_SUB_TITLE = "Aug '23"
+
+st.set_page_config(APP_TITLE)
+st.title(APP_TITLE)
+st.header(APP_SUB_TITLE)
+
+# Add image at top
+image_path = './media/jagged_peaks.jpg'
+st.image(image_path, caption='Intrepid hikers')
 
 # load data file of activities
 file_path = "./data_files/df_rockies.csv"
-df = pd.read_csv(file_path)
+df_rockies = pd.read_csv(file_path)
 
 base_path = "./Aida Strava download/"
 
@@ -37,8 +45,8 @@ def extract_coords(gpx_path):
 df_rockies[['latitude', 'longitude']] = df_rockies['filename'].apply(lambda x: pd.Series(extract_coords(x)))
 
 # Create a map instance
-map = folium.Map(location=[df_rockies['latitude'].mean(), df_rockies['longitude'].mean()],
-                 zoom_start=7,
+map = folium.Map(location=[46.538584, -86.430602],
+                 zoom_start=4,
                  tiles='OpenStreetMap',
                  width=1024,
                  height=600)
@@ -50,7 +58,7 @@ colors = {
     'Walk': 'red'
 }
 
-
+gpx_list = df_rockies['filename'].tolist()
 for item in gpx_list:
   gpx_index = re.search('activities/(.*).gpx', item).group(1)
   csv_filename = './data_files/data/route'+str(gpx_index)+'_df.csv'
@@ -63,10 +71,14 @@ for _, row in df_rockies.iterrows():
     if not pd.isna(img_string) and img_string[-4:] != ".mp4":
 
         # Get the activity description
-        description = row['name']
+        activity_description = row['description']
+        # Get the distance and elevation gain
+        distance = row['distance_km']
+        elev_gain = round(row['elev_gain'])
+        stats = f'Distance: {distance} km, Elevation gain: {elev_gain} m'
 
         # Build the html iframe content
-        html_stuff = f'''<p>{description}</p>'''
+        html_stuff = f'''<p>{activity_description}</p><p>{stats}</p>'''
 
         img_locations = img_string.split('|')
         for loc in img_locations:
@@ -83,13 +95,16 @@ for _, row in df_rockies.iterrows():
     else:
         popup = f"{row['type'].title()}"
 
+    activity_type = row['type']
+    activity_name = row['name']
     # add marker to map
-    folium.Marker(
+    marker = folium.Marker(
         location=[row['latitude'], row['longitude']],
-#         popup=f"{row['type'].title()}",
         popup=popup,
-        icon=folium.Icon(color=colors.get(row['type'], 'gray'))
-    ).add_to(map)
+        icon=folium.Icon(color=colors.get(row['type'], 'gray')),
+        tooltip = f'{activity_type}: {activity_name}'
+    )
+    marker.add_to(map)
 
     # read in csv file with coordinates of entire route
     gpx_file = row['filename']
@@ -105,6 +120,14 @@ for _, row in df_rockies.iterrows():
         weight=2.5,
         opacity=1
     ).add_to(map)
+
+# add marker for Oakville to map
+marker_oakville = folium.Marker(
+    location=[43.484830, -79.687418],
+    icon=folium.Icon(color='gray'),
+    tooltip='Toronto'
+)
+marker_oakville.add_to(map)
 
 # display(map)
 # call to render Folium map in Streamlit
