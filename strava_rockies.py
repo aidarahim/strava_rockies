@@ -26,6 +26,28 @@ st.image(image_path, caption='Intrepid hikers')
 file_path = "./data_files/df_rockies.csv"
 df_rockies = pd.read_csv(file_path)
 
+# max item
+def output_max(type):
+    if type=="Ride":
+        title = "Longest Bike Ride"
+    elif type=="Hike":
+        title = "Longest Hike"
+    else: 
+        title = "Longest Walk"
+    max_val = round(df_rockies[df_rockies['type']==type]['distance_km'].max())
+    max_elev = round(df_rockies[df_rockies['type']==type]['elev_gain'].max())
+    st.metric(title, f'{max_dist} km')
+    st.metric('Elevation gain', f'{max_elev} m')
+
+# Add stats
+col1, col2, col3 = st.columns(3)
+with col1:
+    output_max("Hike")
+with col2:
+    output_max("Ride")
+with col3:
+    output_max("Walk")
+
 # Create a map instance
 map = folium.Map(location=[46.538584, -86.430602],
                  zoom_start=4,
@@ -79,12 +101,13 @@ for _, row in df_rockies.iterrows():
 
     activity_type = row['type']
     activity_name = row['name']
+    activity_date = row['start_date_local']
     # add marker to map
     marker = folium.Marker(
         location=[row['latitude'], row['longitude']],
         popup=popup,
         icon=folium.Icon(color=colors.get(row['type'], 'gray')),
-        tooltip = f'{activity_type}: {activity_name}'
+        tooltip = f'{activity_type} {activity_date}: {activity_name}'
     )
     marker.add_to(map)
 
