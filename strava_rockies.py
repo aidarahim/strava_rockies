@@ -34,7 +34,7 @@ def output_max(type):
         title = "Longest Hike"
     else: 
         title = "Longest Walk"
-    max_val = round(df_rockies[df_rockies['type']==type]['distance_km'].max())
+    max_dist = round(df_rockies[df_rockies['type']==type]['distance_km'].max())
     max_elev = round(df_rockies[df_rockies['type']==type]['elev_gain'].max())
     st.metric(title, f'{max_dist} km')
     st.metric('Elevation gain', f'{max_elev} m')
